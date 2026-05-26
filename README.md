@@ -35,7 +35,7 @@ cp config.example.yml config.yml
 
 Edit `config.yml` and fill in your server details. At minimum you need the `name`, `url`, and `token` for each server. See `config.example.yml` for all available options with descriptions.
 
-To get your API token: open the Technitium web UI, go to **Settings > API Keys**, and create a token with at least read access.
+To get your API token: open the Technitium web UI, go to **Administration > Sessions**, and create a token with at least read access.
 
 ### 4. Run
 

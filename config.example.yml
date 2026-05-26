@@ -7,7 +7,7 @@ port: 3000
 servers:
   - name: ns1                              # Display name shown in the dashboard
     url: http://ns1.example.com:5380       # Technitium API base URL
-    token: your-api-token-here             # API token (Settings > API Keys in Technitium)
+    token: your-api-token-here             # API token (Administration > Sessions in Technitium)
     ignoreSsl: false                       # Set true to skip TLS verification (not recommended)
     queryLogsApp: "Query Logs (MySQL)"     # Optional: name of the query log app installed on this server
     color: blue                            # Optional: colour for this server (see colours below)
