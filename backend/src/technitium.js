@@ -87,7 +87,7 @@ async function getQueryLogs(server, limit) {
     if (!server.queryLogsApp) return null;
     const name = encodeURIComponent(server.queryLogsApp.name);
     const classPath = encodeURIComponent(server.queryLogsApp.classPath);
-    return apiGet(server, 'api/logs/query?name=' + name + '&classPath=' + classPath + '&limit=' + limit + '&descendingOrder=true');
+    return apiGet(server, 'api/logs/query?name=' + name + '&classPath=' + classPath + '&entriesPerPage=' + limit + '&descendingOrder=true');
 }
 
 async function getRttSample(server, limit) {
