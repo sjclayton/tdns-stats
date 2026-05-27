@@ -9,7 +9,7 @@ servers:
     url: http://ns1.example.com:5380       # Technitium API base URL
     token: your-api-token-here             # API token (Administration > Sessions in Technitium)
     ignoreSsl: false                       # Set true to skip TLS verification (not recommended)
-    queryLogsApp: "Query Logs (MySQL)"     # Optional: name of the query log app installed on this server
+    queryLogsApp: "Query Logs (MySQL)"     # Optional: query log app name (see supported apps below)
     color: blue                            # Optional: colour for this server (see colours below)
 
   - name: ns2
@@ -18,6 +18,17 @@ servers:
     ignoreSsl: false
     queryLogsApp: "Query Logs (MySQL)"
     color: green
+
+# queryLogsApp enables the live feed and RTT metrics. If omitted, the first supported app found
+# on the server is used automatically. To specify one explicitly, use the exact app name below:
+#
+#   "Query Logs (Sqlite)"      - Query Logs (SQLite)
+#   "Query Logs (MySQL)"       - Query Logs (MySQL)
+#   "Query Logs (PostgreSQL)"  - Query Logs (PostgreSQL)
+#   "Query Logs (SQL Server)"  - Query Logs (SQL Server)
+#
+# The name must match exactly as it appears in Technitium under Apps. If no query log app is
+# installed, the live feed and RTT metrics will not be available but all other stats will work.
 
 # Available colours: blue, green, ora, teal, pur, yel, red
 # If colour is omitted, servers are auto-assigned colours in the order listed above.
