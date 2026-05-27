@@ -90,7 +90,11 @@ const App = (() => {
 
         } else if (msg.type === 'perf') {
             state.perf[msg.server] = msg.data;
-            renderPerfCards();
+            if (state.activeTab === msg.server) {
+                renderClusterCards();
+            } else {
+                renderPerfCards();
+            }
         }
     }
 
@@ -318,6 +322,7 @@ const App = (() => {
             }
         } else {
             container.appendChild(buildServerCard(state.activeTab, state.nodes[state.activeTab]));
+            container.appendChild(buildPerfCard(state.activeTab, state.perf[state.activeTab] || null));
         }
     }
 
@@ -485,15 +490,17 @@ const App = (() => {
         const container = document.getElementById('perfCards');
         if (!container) return;
 
-        const names = state.activeTab === CLUSTER_KEY || state.activeTab === 'all'
-            ? state.serverNames
-            : [state.activeTab];
+        // Single server: perf card is rendered inline next to the stats card
+        if (state.activeTab !== CLUSTER_KEY && state.activeTab !== 'all') {
+            container.innerHTML = '';
+            return;
+        }
 
+        const names = state.serverNames;
         if (names.length === 0) return;
 
         container.innerHTML = '';
         for (const name of names) {
-            // Always render — pass null perf to show loading state
             container.appendChild(buildPerfCard(name, state.perf[name] || null));
         }
     }
