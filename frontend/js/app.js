@@ -31,6 +31,16 @@ const App = (() => {
         if (es) es.close();
         es = new EventSource('/api/stream');
 
+        let lastMsg = Date.now();
+        const stalenessTimer = setInterval(() => {
+            if (Date.now() - lastMsg > 60000) {
+                clearInterval(stalenessTimer);
+                setConnDot('error');
+                es.close();
+                setTimeout(connect, 3000);
+            }
+        }, 20000);
+
         es.onopen = () => {
             state.connected = true;
             setConnDot('connected');
@@ -38,6 +48,7 @@ const App = (() => {
         };
 
         es.onerror = () => {
+            clearInterval(stalenessTimer);
             state.connected = false;
             setConnDot('error');
             document.getElementById('lastUpdated').textContent = 'Reconnecting...';
@@ -46,6 +57,7 @@ const App = (() => {
         };
 
         es.onmessage = evt => {
+            lastMsg = Date.now();
             let msg;
             try { msg = JSON.parse(evt.data); } catch (_) { return; }
             handleMessage(msg);
