@@ -252,9 +252,8 @@ main { position: relative; z-index: 1; }
     font-family: 'Chakra Petch', sans-serif;
 }
 .stat-mini-value {
-    font-size: 15px; font-weight: 600;
+    font-size: 13px; font-weight: 600;
     font-family: 'JetBrains Mono', monospace; line-height: 1;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .stat-mini-value.blue  { color: var(--accent-blue); }
 .stat-mini-value.red   { color: var(--accent-red); }
@@ -367,8 +366,7 @@ main { position: relative; z-index: 1; }
 /* ===== Responsive ===== */
 
 @media (max-width: 1024px) {
-    .stat-mini-value { font-size: 14px; }
-    .chart-wrap      { height: 220px; }
+    .chart-wrap { height: 220px; }
 }
 
 @media (max-width: 900px) {
@@ -387,7 +385,6 @@ main { position: relative; z-index: 1; }
     .topbar-right    { margin-left: auto; }
     .last-updated    { display: none; }
     .chart-controls  { flex-wrap: wrap; }
-    .stat-mini-value { font-size: 14px; }
 }
 
 @media (max-width: 600px) {
@@ -410,7 +407,6 @@ main { position: relative; z-index: 1; }
     .feed-row         { grid-template-columns: 52px 86px 1fr auto; gap: 6px; }
     .feed-server      { display: none; }
     .feed-proto       { display: none; }
-    .stat-mini-value  { font-size: 13px; }
     .stat-mini-label  { font-size: 8px; }
     .chart-wrap       { height: 160px; }
     .node-ip          { display: none; }
