@@ -82,7 +82,7 @@ async function discoverQueryLogsApp(server, preferredName) {
     try {
         const res = await apiGet(server, 'api/apps/list');
         for (const app of res.apps || []) {
-            if (preferredName && app.name !== preferredName) continue;
+            if (preferredName && app.name.toLowerCase() !== preferredName.toLowerCase()) continue;
             for (const da of app.dnsApps || []) {
                 if (da.isQueryLogs) return { name: app.name, classPath: da.classPath };
             }
