@@ -103,6 +103,12 @@ class Poller {
     }
 
     async _pollFeed() {
+        if (this._feedPollInProgress) return;
+        this._feedPollInProgress = true;
+        try { await this._doFeedPoll(); } finally { this._feedPollInProgress = false; }
+    }
+
+    async _doFeedPoll() {
         for (const server of this.servers) {
             try {
                 const logs = await getQueryLogs(server, this.cfg.feedPageSize);
