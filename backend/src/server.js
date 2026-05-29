@@ -103,15 +103,23 @@ async function start() {
         res.flushHeaders();
 
         clients.add(res);
+        if (clients.size === 1) poller.resume();
 
         const state = poller.getState();
         if (state.nodes) res.write(`data: ${JSON.stringify({ type: 'stats', data: state.nodes })}\n\n`);
+        if (state.perf && Object.keys(state.perf).length > 0) {
+            for (const [server, data] of Object.entries(state.perf)) {
+                res.write(`data: ${JSON.stringify({ type: 'perf', server, data })}
+
+`);
+            }
+        }
 
         const ping = setInterval(() => {
             try { res.write(': ping\n\n'); } catch (_) { clearInterval(ping); }
         }, 20000);
 
-        req.on('close', () => { clients.delete(res); clearInterval(ping); });
+        req.on('close', () => { clients.delete(res); if (clients.size === 0) poller.pause(); clearInterval(ping); });
     });
 
     app.get('/api/servers', (req, res) => {

@@ -18,6 +18,7 @@ class Poller {
             feedPageSize:  cfg?.feed?.pageSize  || 20,
         };
         this.state     = {};
+        this.state.perf  = {};
         this.feedCursors   = {};
         this.clusterServer = null;
         this._statsTimer = null;
@@ -42,6 +43,24 @@ class Poller {
         clearInterval(this._feedTimer);
         clearInterval(this._topTimer);
         clearInterval(this._perfTimer);
+    }
+
+    pause() {
+        clearInterval(this._statsTimer);
+        clearInterval(this._feedTimer);
+        clearInterval(this._topTimer);
+        clearInterval(this._perfTimer);
+    }
+
+    resume() {
+        this._pollStats();
+        this._pollFeed();
+        this._pollTop();
+        this._pollPerformance();
+        this._statsTimer = setInterval(() => this._pollStats(),       this.cfg.statsInterval);
+        this._feedTimer  = setInterval(() => this._pollFeed(),        this.cfg.feedInterval);
+        this._topTimer   = setInterval(() => this._pollTop(),         this.cfg.topInterval);
+        this._perfTimer  = setInterval(() => this._pollPerformance(), this.cfg.perfInterval);
     }
 
     getState() {
@@ -194,7 +213,25 @@ class Poller {
 
                 const denominator = totalRecursive + totalCached;
                 const hitRate     = denominator > 0 ? (totalCached / denominator) * 100 : 0;
-                const impact      = totalQueries > 0 ? mean * (totalRecursive / totalQueries) : 0;
+                const impact      = denominator > 0 ? mean * (rtts.length / denominator) : 0;
+
+                const perfData = {
+                    rtt: {
+                        median:  +median.toFixed(2),
+                        mean:    +mean.toFixed(2),
+                        p99:     +p99.toFixed(2),
+                        jitter:  +jitter.toFixed(2),
+                        samples: rtts.length
+                    },
+                    cache: {
+                        hitRate:    +hitRate.toFixed(1),
+                        entries:    cachedEntries,
+                        maxEntries: cacheMax
+                    },
+                    impact:  +impact.toFixed(2)
+                };
+
+                this.state.perf[server.name] = perfData;
 
                 this.broadcast({
                     type:   'perf',
