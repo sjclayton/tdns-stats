@@ -23,6 +23,10 @@ const App = (() => {
         connected:     false,
         lastUpdated:   null,
         isCluster:     false,
+        version:       null,
+        updateAvailable: false,
+        updateStatus:  null,
+        healthCheckTimer: null,
     };
 
     let es = null;
@@ -110,6 +114,8 @@ const App = (() => {
             } else {
                 renderPerfCards();
             }
+        } else if (msg.type === 'update-status') {
+            handleUpdateStatus(msg.data);
         }
     }
 
@@ -744,8 +750,180 @@ const App = (() => {
         });
     }
 
+    // ---- Update functionality ---------------------------------------------------
+    function handleUpdateStatus(data) {
+        state.updateStatus = data.status;
+        updateStatusDisplay();
+
+        if (data.status === 'done') {
+            setTimeout(() => {
+                state.updateStatus = null;
+                document.getElementById('updateStatus').hidden = true;
+                document.getElementById('updateBtn').hidden = true;
+                state.updateAvailable = false;
+            }, 3000);
+        }
+    }
+
+    function updateStatusDisplay() {
+        const statusEl = document.getElementById('updateStatus');
+        const checkBtn = document.getElementById('checkUpdatesBtn');
+        const updateBtn = document.getElementById('updateBtn');
+
+        if (!state.updateStatus) {
+            statusEl.hidden = true;
+            checkBtn.classList.remove('checking', 'updating');
+            updateBtn.classList.remove('updating', 'update-ready');
+            return;
+        }
+
+        statusEl.hidden = false;
+        const messages = {
+            'checking': 'Checking...',
+            'checked': 'Up to date',
+            'update-available': 'Update available',
+            'updating': 'Updating...',
+            'restarting': 'Restarting...',
+            'reconnecting': 'Reconnecting...',
+            'done': 'Done!'
+        };
+        statusEl.textContent = messages[state.updateStatus] || state.updateStatus;
+        statusEl.className = 'update-status';
+
+        if (state.updateStatus === 'checking') {
+            checkBtn.classList.add('checking');
+            statusEl.classList.remove('success', 'error');
+        } else if (state.updateStatus === 'checked') {
+            checkBtn.classList.remove('checking');
+            statusEl.classList.add('success');
+        } else if (state.updateStatus === 'update-available') {
+            statusEl.classList.remove('success', 'error');
+            updateBtn.classList.add('update-ready');
+            updateBtn.hidden = false;
+        } else if (state.updateStatus === 'updating' || state.updateStatus === 'restarting' || state.updateStatus === 'reconnecting') {
+            updateBtn.classList.add('updating');
+            checkBtn.classList.add('checking');
+        } else if (state.updateStatus === 'done') {
+            statusEl.classList.add('success');
+            checkBtn.classList.remove('checking');
+            updateBtn.classList.remove('updating', 'update-ready');
+        }
+    }
+
+    async function fetchVersion() {
+        try {
+            const res = await fetch('/api/version');
+            const data = await res.json();
+            if (data.version) {
+                state.version = data.version;
+                document.getElementById('versionPill').textContent = 'v' + data.version;
+            }
+        } catch (e) {
+            console.error('Failed to fetch version:', e);
+        }
+    }
+
+    async function checkUpdates() {
+        if (state.updateStatus === 'checking') return;
+
+        state.updateStatus = 'checking';
+        updateStatusDisplay();
+
+        try {
+            const res = await fetch('/api/updates/check');
+            const data = await res.json();
+
+            if (data.error) {
+                state.updateStatus = null;
+                updateStatusDisplay();
+                return;
+            }
+
+            if (data.updateAvailable) {
+                state.updateAvailable = true;
+                state.updateStatus = 'update-available';
+            } else {
+                state.updateStatus = 'checked';
+                setTimeout(() => {
+                    state.updateStatus = null;
+                    updateStatusDisplay();
+                }, 2000);
+            }
+            updateStatusDisplay();
+        } catch (e) {
+            console.error('Failed to check updates:', e);
+            state.updateStatus = null;
+            updateStatusDisplay();
+        }
+    }
+
+    async function triggerUpdate() {
+        if (state.updateStatus === 'updating') return;
+
+        state.updateStatus = 'updating';
+        updateStatusDisplay();
+
+        try {
+            const res = await fetch('/api/updates/trigger', { method: 'POST' });
+            if (!res.ok) {
+                state.updateStatus = null;
+                updateStatusDisplay();
+                return;
+            }
+
+            state.updateStatus = 'restarting';
+            updateStatusDisplay();
+
+            // Poll for service recovery
+            await pollHealth();
+        } catch (e) {
+            console.error('Failed to trigger update:', e);
+            state.updateStatus = null;
+            updateStatusDisplay();
+        }
+    }
+
+    async function pollHealth() {
+        const maxAttempts = 30; // 30 * 2 seconds = 60 seconds timeout
+        let attempts = 0;
+
+        state.updateStatus = 'reconnecting';
+        updateStatusDisplay();
+
+        const poll = async () => {
+            attempts++;
+            try {
+                const res = await fetch('/api/health');
+                if (res.ok) {
+                    state.updateStatus = 'done';
+                    updateStatusDisplay();
+                    setTimeout(() => location.reload(), 1000);
+                    return;
+                }
+            } catch (e) {
+                // Service not ready yet
+            }
+
+            if (attempts < maxAttempts) {
+                setTimeout(poll, 2000);
+            } else {
+                state.updateStatus = null;
+                updateStatusDisplay();
+            }
+        };
+
+        poll();
+    }
+
+    function setupUpdateButtons() {
+        document.getElementById('checkUpdatesBtn').addEventListener('click', checkUpdates);
+        document.getElementById('updateBtn').addEventListener('click', triggerUpdate);
+    }
+
     function init() {
         initTheme();
+        setupUpdateButtons();
+        fetchVersion();
         Charts.init();
         fetch('/api/config')
             .then(r => r.json())

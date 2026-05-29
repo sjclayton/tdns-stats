@@ -7,13 +7,30 @@ const https     = require('https');
 const path      = require('path');
 const fs        = require('fs');
 const yaml      = require('js-yaml');
+const fetch     = require('node-fetch');
 const Poller    = require('./poller');
+const Updater   = require('./updater');
 const { listQueryLogApps, discoverQueryLogsApp, getCacheMaxEntries, getDashboard, getTopStats } = require('./technitium');
+
+const PACKAGE = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf8'));
+const VERSION = PACKAGE.version;
 
 const CONFIG_PATHS = [
     '/etc/tdns-stats/config.yml',
     path.join(__dirname, '../../config.yml')
 ];
+
+function semverGreater(v1, v2) {
+    const parse = (v) => {
+        const parts = v.split('.').map(p => parseInt(p, 10) || 0);
+        return { major: parts[0], minor: parts[1], patch: parts[2] };
+    };
+    const a = parse(v1);
+    const b = parse(v2);
+    if (a.major !== b.major) return a.major > b.major;
+    if (a.minor !== b.minor) return a.minor > b.minor;
+    return a.patch > b.patch;
+}
 
 function loadConfig() {
     for (const p of CONFIG_PATHS) {
@@ -74,6 +91,8 @@ async function start() {
 
     const poller = new Poller(servers, broadcast, config);
     poller.start();
+
+    const updater = new Updater(path.join(__dirname, '../..'));
 
     const app = express();
 
@@ -164,6 +183,83 @@ async function start() {
             const data = await getTopStats(server, statsType, config.top?.limit || 20, rangeType, isCluster ? 'cluster' : null);
             res.json(data);
         } catch (e) { res.status(502).json({ error: e.message }); }
+    });
+
+    app.get('/api/version', (req, res) => {
+        res.json({ version: VERSION });
+    });
+
+    app.get('/api/health', (req, res) => {
+        res.json({ status: 'ok', version: VERSION });
+    });
+
+    app.get('/api/updates/check', async (req, res) => {
+        try {
+            const response = await fetch('https://api.github.com/repos/Hemsby/tdns-stats/releases/latest', {
+                timeout: 5000,
+                headers: { 'User-Agent': 'tdns-stats' }
+            });
+
+            if (!response.ok) {
+                return res.status(502).json({ error: 'Failed to fetch release info' });
+            }
+
+            const release = await response.json();
+            const latestVersion = release.tag_name ? release.tag_name.replace(/^v/, '') : null;
+
+            if (!latestVersion) {
+                return res.json({ updateAvailable: false, currentVersion: VERSION });
+            }
+
+            const updateAvailable = semverGreater(latestVersion, VERSION);
+
+            res.json({
+                currentVersion: VERSION,
+                latestVersion,
+                updateAvailable,
+                downloadUrl: release.html_url,
+                releaseNotes: release.body,
+            });
+
+            broadcast({
+                type: 'update-status',
+                data: {
+                    status: 'checked',
+                    currentVersion: VERSION,
+                    latestVersion,
+                    updateAvailable,
+                }
+            });
+        } catch (e) {
+            console.error('[updates] Error checking for updates:', e.message);
+            res.status(502).json({ error: 'Failed to check updates' });
+        }
+    });
+
+    app.post('/api/updates/trigger', async (req, res) => {
+        try {
+            broadcast({
+                type: 'update-status',
+                data: { status: 'updating' }
+            });
+
+            res.json({ status: 'update_started' });
+
+            setTimeout(async () => {
+                try {
+                    await updater.executeUpdate();
+                } catch (e) {
+                    console.error('[updates] Update failed:', e.message);
+                    broadcast({
+                        type: 'update-status',
+                        data: { status: null, error: e.message }
+                    });
+                }
+            }, 100);
+        } catch (e) {
+            console.error('[updates] Failed to trigger update:', e.message);
+            res.status(500).json({ error: 'Failed to trigger update' });
+        }
     });
 
     const tlsCfg = config.https;

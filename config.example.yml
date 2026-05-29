@@ -59,6 +59,13 @@ rtt:
 #   - teal
 #   - yel
 
+# Optional: update check settings
+# updates:
+#   checkInterval: 3600         # seconds between auto-update checks (default: hourly)
+#   enableAutoUpdate: false     # auto-trigger updates when available (default: false, manual only)
+#   deploymentType: null        # override deployment detection: 'git', 'docker', or 'systemd'
+#                               # (usually auto-detected based on environment)
+
 # Optional: serve over HTTPS without a reverse proxy.
 # Provide either a separate cert+key pair or a single combined PEM file.
 # https:

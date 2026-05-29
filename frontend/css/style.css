@@ -105,6 +105,34 @@ main { position: relative; z-index: 1; }
 .theme-btn:hover { color: var(--text); background: var(--bg-hover); }
 .theme-btn.active { color: var(--accent-blue); background: rgba(34,211,238,.08); }
 
+/* Version info and update buttons */
+.version-info {
+    display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+}
+.version-pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 3px 8px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 4px; font-size: 10px; font-weight: 600; font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted); letter-spacing: .3px;
+}
+.icon-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 26px; height: 24px; background: none; border: none;
+    color: var(--text-muted); cursor: pointer; transition: color .15s, background .15s;
+    flex-shrink: 0;
+}
+.icon-btn:hover { color: var(--text); background: var(--bg-hover); }
+.icon-btn.checking { animation: spin .8s linear infinite; }
+.icon-btn.updating { color: var(--accent-yel); animation: spin .8s linear infinite; }
+.icon-btn.update-ready { color: var(--accent-green); }
+.update-status {
+    font-size: 10px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace;
+    letter-spacing: .3px; white-space: nowrap;
+}
+.update-status.success { color: var(--accent-green); }
+.update-status.error { color: var(--accent-red); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* Server status pills */
 .server-pill {
     display: inline-flex; align-items: center; gap: 5px;

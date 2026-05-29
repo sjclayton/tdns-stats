@@ -25,6 +25,16 @@
         </div>
         <div class="topbar-status" id="serverIndicators"></div>
         <div class="topbar-right">
+            <div class="version-info">
+                <span class="version-pill" id="versionPill">v?.?.?</span>
+                <button class="icon-btn" id="checkUpdatesBtn" title="Check for updates">
+                    <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M1.5 1A.5.5 0 011 1.5v4.8a2.5 2.5 0 005 0V6a.5.5 0 011 0v.3a3.5 3.5 0 11-3.5-3.5V1.5a.5.5 0 01.5-.5z"/></svg>
+                </button>
+                <button class="icon-btn" id="updateBtn" title="Update available" hidden>
+                    <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M8 1a.5.5 0 01.5.5v11.793l3.146-3.147a.5.5 0 01.708.708l-4 4a.5.5 0 01-.708 0l-4-4a.5.5 0 01.708-.708L7.5 13.293V1.5A.5.5 0 018 1z"/></svg>
+                </button>
+                <span class="update-status" id="updateStatus" hidden></span>
+            </div>
             <div class="theme-switcher">
                 <button class="theme-btn" data-theme="system" title="System theme">
                     <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor"><path d="M0 4s0-2 2-2h12s2 0 2 2v6s0 2-2 2h-4l1 2h1a.5.5 0 010 1H4a.5.5 0 010-1h1l1-2H2s-2 0-2-2zm1.398 0A1 1 0 001 4.5v5.086l.002.051c.014.24.117.48.307.67.19.189.43.293.691.293H14c.261 0 .501-.104.691-.293.19-.19.293-.43.307-.67L15 9.586V4.5a1 1 0 00-1-1H2a1 1 0 00-.602.5z"/></svg>
