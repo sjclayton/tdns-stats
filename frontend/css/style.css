@@ -64,6 +64,8 @@ html, body {
     line-height: 1.5;
 }
 
+[hidden] { display: none !important; }
+
 /* Subtle dot-grid texture in dark mode */
 body::before {
     content: '';

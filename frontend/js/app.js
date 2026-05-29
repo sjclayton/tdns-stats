@@ -772,6 +772,7 @@ const App = (() => {
 
         if (!state.updateStatus) {
             statusEl.hidden = true;
+            updateBtn.hidden = true;
             checkBtn.classList.remove('checking', 'updating');
             updateBtn.classList.remove('updating', 'update-ready');
             return;

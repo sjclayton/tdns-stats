@@ -105,7 +105,7 @@ async function start() {
                 styleSrc:      ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "fonts.googleapis.com"],
                 fontSrc:       ["'self'", "fonts.gstatic.com", "cdn.jsdelivr.net"],
                 imgSrc:        ["'self'", "data:"],
-                connectSrc:    ["'self'"],
+                connectSrc:    ["'self'", "cdn.jsdelivr.net"],
                 objectSrc:     ["'none'"],
                 frameAncestors:["'self'"]
             }
@@ -200,12 +200,17 @@ async function start() {
                 headers: { 'User-Agent': 'tdns-stats' }
             });
 
-            if (!response.ok) {
+            let latestVersion = null;
+            let release = null;
+
+            if (response.ok) {
+                release = await response.json();
+                latestVersion = release.tag_name ? release.tag_name.replace(/^v/, '') : null;
+            } else if (response.status === 404) {
+                return res.json({ updateAvailable: false, currentVersion: VERSION });
+            } else {
                 return res.status(502).json({ error: 'Failed to fetch release info' });
             }
-
-            const release = await response.json();
-            const latestVersion = release.tag_name ? release.tag_name.replace(/^v/, '') : null;
 
             if (!latestVersion) {
                 return res.json({ updateAvailable: false, currentVersion: VERSION });
