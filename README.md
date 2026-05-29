@@ -93,12 +93,14 @@ After=network.target
 Type=simple
 WorkingDirectory=/opt/tdns-stats
 ExecStart=/usr/bin/node /opt/tdns-stats/backend/src/server.js
-Restart=on-failure
+Restart=always
 RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
 ```
+
+**Important:** Use `Restart=always` (not `on-failure`) to enable the auto-update feature. When updates are triggered, the service exits gracefully and systemd automatically restarts it with the latest code.
 
 Then enable and start it:
 
@@ -107,6 +109,26 @@ systemctl daemon-reload
 systemctl enable tdns-stats
 systemctl start tdns-stats
 ```
+
+## Auto-Update
+
+The dashboard includes a built-in update checker that works with GitHub releases.
+
+**In the UI:**
+- Version number appears in the top-right corner
+- Click **Check for updates** to fetch the latest release from GitHub
+- If a newer version is available, click **Update** to trigger the update
+- The service automatically detects when it comes back online and refreshes the page
+
+**How it works by deployment method:**
+- **Git clone:** `git fetch` + `git reset --hard origin/master`, then restarts
+- **Docker:** `docker-compose pull` + `docker-compose up -d`
+- **Systemd:** Same as git clone, then `systemctl restart tdns-stats`
+
+**Requirements:**
+- For systemd: `Restart=always` in the service file (see above)
+- For Docker: Restart policy configured (e.g. `--restart unless-stopped`)
+- GitHub releases must be published with version tags (e.g. `v1.1.0`)
 
 ## Configuration reference
 
