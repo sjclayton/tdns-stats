@@ -4,6 +4,8 @@ A self-hosted statistics dashboard for [Technitium DNS Server](https://technitiu
 
 Displays live query feeds, per-server and cluster stats, top domains/clients, performance metrics (RTT, cache hit rate), and a real-time chart — all pushed to the browser via Server-Sent Events with no page refreshes required.
 
+See the [CHANGELOG](CHANGELOG.md) for a full history of changes.
+
 ## Screenshots
 
 ### Dark mode
