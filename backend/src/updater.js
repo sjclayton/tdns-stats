@@ -60,10 +60,13 @@ class Updater {
 
     async updateGit() {
         const cwd = this.projectRoot;
-        console.log('[update] Executing git pull');
-        const { stdout, stderr } = await execAsync('git pull', { cwd });
-        if (stderr) console.log('[update] git pull stderr:', stderr);
+        console.log('[update] Fetching from remote');
+        await execAsync('git fetch origin master', { cwd });
+        console.log('[update] Resetting to remote master');
+        const { stdout, stderr } = await execAsync('git reset --hard origin/master', { cwd });
+        if (stderr) console.log('[update] git stderr:', stderr);
         console.log('[update] Update complete, process will restart');
+        console.log('[update] stdout:', stdout);
         process.exit(0);
     }
 
