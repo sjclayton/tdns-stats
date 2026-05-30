@@ -786,10 +786,13 @@ const App = (() => {
         const statusEl = document.getElementById('updateStatus');
         const checkBtn = document.getElementById('checkUpdatesBtn');
         const updateBtn = document.getElementById('updateBtn');
+        const overlay = document.getElementById('updateOverlay');
+        const overlayText = document.getElementById('updateOverlayText');
 
         if (!state.updateStatus) {
             statusEl.hidden = true;
             updateBtn.hidden = true;
+            overlay.hidden = true;
             checkBtn.classList.remove('checking', 'updating');
             updateBtn.classList.remove('updating', 'update-ready');
             return;
@@ -801,9 +804,9 @@ const App = (() => {
             'checked': 'Up to date',
             'update-available': 'Update available',
             'updating': 'Updating...',
-            'restarting': 'Restarting...',
+            'restarting': 'Service is restarting...',
             'reconnecting': 'Reconnecting...',
-            'done': 'Done!'
+            'done': 'Update complete!'
         };
         statusEl.textContent = messages[state.updateStatus] || state.updateStatus;
         statusEl.className = 'update-status';
@@ -811,20 +814,26 @@ const App = (() => {
         if (state.updateStatus === 'checking') {
             checkBtn.classList.add('checking');
             statusEl.classList.remove('success', 'error');
+            overlay.hidden = true;
         } else if (state.updateStatus === 'checked') {
             checkBtn.classList.remove('checking');
             statusEl.classList.add('success');
+            overlay.hidden = true;
         } else if (state.updateStatus === 'update-available') {
             statusEl.classList.remove('success', 'error');
             updateBtn.classList.add('update-ready');
             updateBtn.hidden = false;
+            overlay.hidden = true;
         } else if (state.updateStatus === 'updating' || state.updateStatus === 'restarting' || state.updateStatus === 'reconnecting') {
             updateBtn.classList.add('updating');
             checkBtn.classList.add('checking');
+            overlay.hidden = false;
+            overlayText.textContent = messages[state.updateStatus];
         } else if (state.updateStatus === 'done') {
             statusEl.classList.add('success');
             checkBtn.classList.remove('checking');
             updateBtn.classList.remove('updating', 'update-ready');
+            overlayText.textContent = messages[state.updateStatus];
         }
     }
 

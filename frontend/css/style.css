@@ -403,6 +403,29 @@ main { position: relative; z-index: 1; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 3px; }
 
+/* ---- Update overlay ---- */
+.update-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(5, 8, 13, 0.85); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999; animation: fadeIn .3s ease-in;
+}
+.update-overlay-content {
+    text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+.update-spinner {
+    width: 48px; height: 48px;
+    border: 3px solid var(--border); border-top-color: var(--accent-blue);
+    border-radius: 50%; animation: spin 1s linear infinite;
+}
+.update-overlay-text {
+    font-size: 18px; color: var(--text); font-weight: 500; letter-spacing: .5px;
+}
+.update-overlay-subtext {
+    font-size: 12px; color: var(--text-dim); letter-spacing: .2px;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 /* ===== Responsive ===== */
 
 @media (max-width: 1024px) {
