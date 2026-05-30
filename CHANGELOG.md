@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-05-30
+
+### Added
+- Dynamic chart heading that updates based on selected time range (Queries per minute/hour/day)
+- Recursive dataset added to Overview graph for better query type visibility
+
 ## [1.2.1] - 2026-05-30
 
 ### Fixed
