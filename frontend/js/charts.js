@@ -85,10 +85,15 @@ const Charts = (() => {
 
         // Preserve hidden label state across polling updates
         if (lastView && chart.data.datasets.length > 0) {
-            hiddenByView[lastView] = new Set();
-            for (let i = 0; i < chart.data.datasets.length; i++) {
-                if (!chart.isDatasetVisible(i)) {
-                    hiddenByView[lastView].add(chart.data.datasets[i].label);
+            const currentSet = hiddenByView[lastView];
+            
+            if (currentSet) {
+                currentSet.clear();
+                
+                for (let i = 0; i < chart.data.datasets.length; i++) {
+                    if (!chart.isDatasetVisible(i)) {
+                        currentSet.add(chart.data.datasets[i].label);
+                    }
                 }
             }
         }
@@ -119,10 +124,10 @@ const Charts = (() => {
         chart.update('none');
 
         // Restore hidden label state after update
-        const hidden = hiddenByView[datasetMode] || new Set();
-        for (let i = 0; i < chart.data.datasets.length; i++) {
-            if (hidden.has(chart.data.datasets[i].label)) {
-                chart.getDatasetMeta(i).hidden = true;
+        const hidden = hiddenByView[datasetMode];
+        if (hidden) {
+            for (let i = 0; i < chart.data.datasets.length; i++) {
+                chart.getDatasetMeta(i).hidden = hidden.has(chart.data.datasets[i].label);
             }
         }
         chart.update('none');
