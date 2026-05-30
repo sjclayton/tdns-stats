@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-05-30
+
+### Fixed
+- Fixed auto-update not executing due to missing shell context in git and systemctl commands
+- Improved error logging in update process for better troubleshooting
+
 ## [1.2.0] - 2026-05-30
 
 ### Added
