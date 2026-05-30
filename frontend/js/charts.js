@@ -121,7 +121,6 @@ const Charts = (() => {
 
         chart.data.labels   = chartData.labels || [];
         chart.data.datasets = datasets;
-        chart.update('none');
 
         // Restore hidden label state after update
         const hidden = hiddenByView[datasetMode];
@@ -130,6 +129,7 @@ const Charts = (() => {
                 chart.getDatasetMeta(i).hidden = hidden.has(chart.data.datasets[i].label);
             }
         }
+
         chart.update('none');
     }
 
