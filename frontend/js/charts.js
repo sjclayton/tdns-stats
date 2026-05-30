@@ -2,6 +2,8 @@
 
 const Charts = (() => {
     let chart = null;
+    let lastView = null;
+    const hiddenByView = { overview: new Set(), all: new Set() };
 
     const DATASET_COLORS = {
         'Total':          { border: 'rgb(34,211,238)',   bg: 'rgba(34,211,238,.07)'   },
@@ -81,6 +83,22 @@ const Charts = (() => {
         const chartData = responseOrChartData?.mainChartData || responseOrChartData;
         if (!chartData?.labels) return;
 
+        // Preserve hidden label state across polling updates
+        if (lastView && chart.data.datasets.length > 0) {
+            const currentSet = hiddenByView[lastView];
+            
+            if (currentSet) {
+                currentSet.clear();
+                
+                for (let i = 0; i < chart.data.datasets.length; i++) {
+                    if (!chart.isDatasetVisible(i)) {
+                        currentSet.add(chart.data.datasets[i].label);
+                    }
+                }
+            }
+        }
+        lastView = datasetMode;
+
         const showAll = datasetMode === 'all';
         const allowed = new Set(showAll ? Object.keys(DATASET_COLORS) : OVERVIEW_DATASETS);
 
@@ -103,6 +121,15 @@ const Charts = (() => {
 
         chart.data.labels   = chartData.labels || [];
         chart.data.datasets = datasets;
+
+        // Restore hidden label state after update
+        const hidden = hiddenByView[datasetMode];
+        if (hidden) {
+            for (let i = 0; i < chart.data.datasets.length; i++) {
+                chart.getDatasetMeta(i).hidden = hidden.has(chart.data.datasets[i].label);
+            }
+        }
+
         chart.update('none');
     }
 
