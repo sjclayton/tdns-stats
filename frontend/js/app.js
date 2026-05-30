@@ -834,6 +834,10 @@ const App = (() => {
             checkBtn.classList.remove('checking');
             updateBtn.classList.remove('updating', 'update-ready');
             overlayText.textContent = messages[state.updateStatus];
+            setTimeout(() => {
+                overlay.hidden = true;
+                state.updateStatus = null;
+            }, 1500);
         }
     }
 
